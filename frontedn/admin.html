@@ -1,1 +1,511 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Kema O'yini</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #4db8ff;
+      --gold: #f5c842;
+      --white: #f0f4ff;
+      --muted: #7a99cc;
+      --danger: #ff4d6d;
+      --success: #2ecc71;
+      --warning: #f39c12;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+    }
 
+    /* Login */
+    .login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+    }
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-box h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 20px; color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .login-box p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--white);
+      font-size: 14px; margin-bottom: 12px;
+      outline: none;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .btn {
+      padding: 12px 24px; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #000; width: 100%; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-danger { background: rgba(255,77,109,0.15); color: var(--danger); border: 1px solid rgba(255,77,109,0.3); }
+    .btn-success { background: rgba(46,204,113,0.15); color: var(--success); border: 1px solid rgba(46,204,113,0.3); }
+    .btn-warning { background: rgba(243,156,18,0.15); color: var(--warning); border: 1px solid rgba(243,156,18,0.3); }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+    /* Main layout */
+    .main { display: none; }
+    .sidebar {
+      width: 240px; background: var(--card);
+      border-right: 1px solid var(--border);
+      height: 100vh; position: fixed; left: 0; top: 0;
+      padding: 24px 16px;
+    }
+    .sidebar-logo {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 14px; color: var(--accent);
+      margin-bottom: 32px; padding: 0 8px;
+    }
+    .nav-item {
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; font-size: 14px; color: var(--muted);
+      margin-bottom: 4px; transition: all 0.2s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+    .nav-item.active { background: rgba(77,184,255,0.1); color: var(--accent); }
+
+    .content {
+      margin-left: 240px; padding: 32px;
+      min-height: 100vh;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-title {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 20px; margin-bottom: 24px;
+    }
+
+    /* Stats */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 16px; margin-bottom: 32px;
+    }
+    .stat-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 20px;
+    }
+    .stat-box .label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .stat-box .value {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 28px; font-weight: 700; color: var(--accent);
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .table-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .table-header h3 { font-size: 15px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 12px 20px; text-align: left;
+      font-size: 12px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    td {
+      padding: 14px 20px; font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-active { background: rgba(46,204,113,0.15); color: var(--success); }
+    .badge-sunk { background: rgba(255,77,109,0.15); color: var(--danger); }
+    .badge-finished { background: rgba(245,200,66,0.15); color: var(--gold); }
+
+    .progress-mini {
+      width: 100px; height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 6px; overflow: hidden;
+    }
+    .progress-mini-fill {
+      height: 100%; background: var(--accent);
+      border-radius: 6px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px; width: 100%; max-width: 400px;
+    }
+    .modal h3 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 16px; margin-bottom: 20px;
+    }
+    .modal input, .modal select {
+      width: 100%; padding: 12px 16px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--white);
+      font-size: 14px; margin-bottom: 12px; outline: none;
+    }
+    .modal input:focus, .modal select:focus { border-color: var(--accent); }
+    .modal-footer { display: flex; gap: 10px; margin-top: 8px; }
+    .modal-footer .btn { flex: 1; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 14px; font-weight: 500; z-index: 200;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: rgba(46,204,113,0.9); color: #000; }
+    .toast.error { background: rgba(255,77,109,0.9); color: #fff; }
+
+    .actions { display: flex; gap: 8px; }
+
+    .search-input {
+      padding: 8px 14px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--white); font-size: 13px; outline: none; width: 220px;
+    }
+    .search-input:focus { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>🔐 Admin Panel</h1>
+    <p>Kema O'yini boshqaruv paneli</p>
+    <input type="password" id="secretInput" placeholder="Maxfiy kalit..." />
+    <button class="btn btn-primary" onclick="login()">Kirish</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main" id="mainScreen">
+  <div class="sidebar">
+    <div class="sidebar-logo">🚢 Admin Panel</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">📊 Dashboard</div>
+    <div class="nav-item" onclick="showPage('users', this)">👥 Foydalanuvchilar</div>
+    <div class="nav-item" onclick="showPage('purchases', this)">💊 Dori qo'shish</div>
+    <div class="nav-item" onclick="showPage('rewards', this)">🏆 Mukofotlar</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Dashboard -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="label">Jami foydalanuvchilar</div>
+          <div class="value" id="stat-total">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Faol o'yinchilar</div>
+          <div class="value" id="stat-active" style="color: var(--success)">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Cho'kkanlar</div>
+          <div class="value" id="stat-sunk" style="color: var(--danger)">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Yutganlar</div>
+          <div class="value" id="stat-finished" style="color: var(--gold)">—</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Top o'yinchilar</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ism</th>
+              <th>Orol</th>
+              <th>Dorilar</th>
+              <th>Holat</th>
+            </tr>
+          </thead>
+          <tbody id="top-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div class="page" id="page-users">
+      <div class="page-title">Foydalanuvchilar</div>
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Barcha foydalanuvchilar</h3>
+          <input class="search-input" id="searchInput" placeholder="Qidirish..." oninput="filterUsers()" />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Telegram ID</th>
+              <th>Ism</th>
+              <th>Orol</th>
+              <th>Progress</th>
+              <th>Dorilar</th>
+              <th>Holat</th>
+              <th>Amallar</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Purchases -->
+    <div class="page" id="page-purchases">
+      <div class="page-title">Dori qo'shish</div>
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Foydalanuvchiga dori qo'shish</h3>
+        </div>
+        <div style="padding: 24px; max-width: 400px;">
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px;">Telegram ID</label>
+            <input type="number" id="p-userid" placeholder="123456789" style="width:100%; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--white); font-size:14px; outline:none;" />
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px;">Dorilar soni</label>
+            <input type="number" id="p-amount" placeholder="200" style="width:100%; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--white); font-size:14px; outline:none;" />
+          </div>
+          <button class="btn btn-primary" onclick="addPurchase()" style="width:100%">Qo'shish</button>
+          <div id="purchase-result" style="margin-top: 16px; font-size: 14px; color: var(--success);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rewards -->
+    <div class="page" id="page-rewards">
+      <div class="page-title">Mukofotlar</div>
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Mukofot berish</h3>
+        </div>
+        <div style="padding: 24px; max-width: 400px;">
+          <div style="margin-bottom: 12px;">
+            <label style="font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px;">Telegram ID</label>
+            <input type="number" id="r-userid" placeholder="123456789" style="width:100%; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--white); font-size:14px; outline:none;" />
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px;">Mukofot turi</label>
+            <select id="r-type" style="width:100%; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--white); font-size:14px; outline:none;">
+              <option value="Damas">🚗 Damas (20-orol)</option>
+              <option value="Cobalt">🏆 Cobalt (25-orol)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="giveReward()" style="width:100%">Mukofot berish</button>
+          <div id="reward-result" style="margin-top: 16px; font-size: 14px; color: var(--success);"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Reset Modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal">
+    <h3>⚠️ Resetlash</h3>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:20px;">Foydalanuvchining barcha progressi o'chiriladi!</p>
+    <input type="hidden" id="reset-userid" />
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="confirmReset()">Ha, reset</button>
+      <button class="btn" style="background:var(--border)" onclick="closeModal()">Bekor</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = "https://wep-app-production-46b5.up.railway.app";
+  let SECRET = "";
+  let allUsers = [];
+
+  function login() {
+    const val = document.getElementById('secretInput').value.trim();
+    if (!val) return;
+    SECRET = val;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    loadDashboard();
+  }
+
+  document.getElementById('secretInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function showPage(name, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    el.classList.add('active');
+    if (name === 'dashboard') loadDashboard();
+    if (name === 'users') loadUsers();
+  }
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${API}/admin/users?secret=${SECRET}`);
+      const users = await res.json();
+      if (users.error) { showToast('Xato: ' + users.error, 'error'); return; }
+      allUsers = users;
+      document.getElementById('stat-total').textContent = users.length;
+      document.getElementById('stat-active').textContent = users.filter(u => u.status === 'active').length;
+      document.getElementById('stat-sunk').textContent = users.filter(u => u.status === 'sunk').length;
+      document.getElementById('stat-finished').textContent = users.filter(u => u.status === 'finished').length;
+
+      const top = [...users].sort((a,b) => b.current_island - a.current_island).slice(0, 10);
+      document.getElementById('top-tbody').innerHTML = top.map((u, i) => `
+        <tr>
+          <td style="color:var(--muted)">${i+1}</td>
+          <td><strong>${u.name}</strong></td>
+          <td style="color:var(--gold)">${u.current_island}</td>
+          <td>${u.purchases}</td>
+          <td><span class="badge badge-${u.status}">${statusLabel(u.status)}</span></td>
+        </tr>
+      `).join('');
+    } catch(e) {
+      showToast('Server xatosi', 'error');
+    }
+  }
+
+  async function loadUsers() {
+    if (!allUsers.length) {
+      const res = await fetch(`${API}/admin/users?secret=${SECRET}`);
+      allUsers = await res.json();
+    }
+    renderUsers(allUsers);
+  }
+
+  function renderUsers(users) {
+    document.getElementById('users-tbody').innerHTML = users.map(u => {
+      const prog = (u.purchases % 200);
+      const pct = Math.min((prog / 200) * 100, 100);
+      return `
+        <tr>
+          <td style="color:var(--muted); font-size:12px">${u.id}</td>
+          <td><strong>${u.name}</strong></td>
+          <td style="color:var(--gold); font-weight:600">${u.current_island}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="progress-mini"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+              <span style="font-size:12px; color:var(--muted)">${prog}/200</span>
+            </div>
+          </td>
+          <td>${u.purchases}</td>
+          <td><span class="badge badge-${u.status}">${statusLabel(u.status)}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-danger btn-sm" onclick="openReset(${u.id})">Reset</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterUsers() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allUsers.filter(u => u.name.toLowerCase().includes(q) || String(u.id).includes(q));
+    renderUsers(filtered);
+  }
+
+  async function addPurchase() {
+    const id = document.getElementById('p-userid').value;
+    const amount = document.getElementById('p-amount').value;
+    if (!id || !amount) { showToast("ID va miqdorni kiriting", 'error'); return; }
+    const res = await fetch(`${API}/admin/purchase/add?secret=${SECRET}&telegram_id=${id}&amount=${amount}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+    document.getElementById('purchase-result').textContent = `✅ Qo'shildi! Jami: ${data.purchases} dona | Orol: ${data.island}`;
+    showToast("Dori qo'shildi!", 'success');
+    allUsers = [];
+  }
+
+  async function giveReward() {
+    const id = document.getElementById('r-userid').value;
+    const type = document.getElementById('r-type').value;
+    if (!id) { showToast("ID kiriting", 'error'); return; }
+    const res = await fetch(`${API}/admin/reward?secret=${SECRET}&telegram_id=${id}&reward_type=${type}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+    document.getElementById('reward-result').textContent = `✅ ${type} mukofoti berildi!`;
+    showToast("Mukofot berildi!", 'success');
+  }
+
+  function openReset(id) {
+    document.getElementById('reset-userid').value = id;
+    document.getElementById('resetModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('resetModal').classList.remove('open');
+  }
+
+  async function confirmReset() {
+    const id = document.getElementById('reset-userid').value;
+    const res = await fetch(`${API}/admin/reset?secret=${SECRET}&telegram_id=${id}`, { method: 'POST' });
+    const data = await res.json();
+    closeModal();
+    if (data.error) { showToast(data.error, 'error'); return; }
+    showToast("Reset qilindi!", 'success');
+    allUsers = [];
+    loadUsers();
+  }
+
+  function statusLabel(s) {
+    return s === 'active' ? 'Faol' : s === 'sunk' ? "Cho'kdi" : 'Yutdi!';
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

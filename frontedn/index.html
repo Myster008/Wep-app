@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kema O'yini</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ocean: #0a1628;
+      --ocean-mid: #0d2040;
+      --ocean-light: #1a3a6b;
+      --wave: #1e5f9e;
+      --foam: #4db8ff;
+      --gold: #f5c842;
+      --white: #f0f4ff;
+      --muted: #7a99cc;
+      --danger: #ff4d6d;
+      --success: #2ecc71;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--ocean);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 80%, rgba(30,95,158,0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(77,184,255,0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #0a1628 0%, #0d2040 50%, #0a1a35 100%);
+      z-index: 0;
+    }
+
+    .waves {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      z-index: 0;
+      opacity: 0.3;
+    }
+    .wave {
+      position: absolute;
+      bottom: 0;
+      width: 200%;
+      height: 80px;
+      border-radius: 50%;
+    }
+    .wave1 { background: var(--wave); animation: wave 8s linear infinite; bottom: 10px; }
+    .wave2 { background: var(--ocean-light); animation: wave 6s linear infinite reverse; bottom: 0; opacity: 0.6; }
+    @keyframes wave {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px 16px 100px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      animation: fadeDown 0.6s ease;
+    }
+    .header h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--foam);
+      text-shadow: 0 0 30px rgba(77,184,255,0.5);
+    }
+    .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .user-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(77,184,255,0.2);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--wave), var(--foam));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 18px; font-weight: 700; flex-shrink: 0;
+    }
+    .user-info h3 { font-size: 15px; font-weight: 600; }
+    .user-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .status-badge {
+      margin-left: auto;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .status-active { background: rgba(46,204,113,0.2); color: var(--success); }
+    .status-sunk { background: rgba(255,77,109,0.2); color: var(--danger); }
+    .status-finished { background: rgba(245,200,66,0.2); color: var(--gold); }
+
+    .island-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(77,184,255,0.15);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+    .island-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .island-header h2 {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--foam);
+    }
+    .island-num {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 28px; font-weight: 900; color: var(--gold);
+      text-shadow: 0 0 20px rgba(245,200,66,0.4);
+    }
+
+    .ship-journey {
+      position: relative; margin: 16px 0;
+      height: 60px; display: flex; align-items: center;
+    }
+    .journey-line {
+      position: absolute; top: 50%; left: 0; right: 0;
+      height: 2px; background: rgba(77,184,255,0.2); transform: translateY(-50%);
+    }
+    .journey-progress {
+      position: absolute; top: 50%; left: 0;
+      height: 2px; background: linear-gradient(90deg, var(--wave), var(--foam));
+      transform: translateY(-50%); transition: width 1s ease;
+      box-shadow: 0 0 8px var(--foam);
+    }
+    .ship-icon {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 28px; transition: left 1s ease;
+      filter: drop-shadow(0 0 8px rgba(77,184,255,0.6));
+      animation: shipBob 2s ease-in-out infinite;
+    }
+    @keyframes shipBob {
+      0%, 100% { transform: translateY(-50%) rotate(-3deg); }
+      50% { transform: translateY(-60%) rotate(3deg); }
+    }
+    .island-start, .island-end {
+      position: absolute; top: 50%; transform: translateY(-50%); font-size: 22px;
+    }
+    .island-start { left: 0; }
+    .island-end { right: 0; }
+
+    .progress-section { margin-top: 12px; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--muted); margin-bottom: 8px;
+    }
+    .progress-label span:last-child { color: var(--foam); font-weight: 600; }
+    .progress-bar {
+      height: 10px; background: rgba(255,255,255,0.08);
+      border-radius: 10px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--wave), var(--foam));
+      border-radius: 10px; transition: width 1s ease;
+      box-shadow: 0 0 10px rgba(77,184,255,0.4);
+    }
+
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin-bottom: 20px;
+      animation: fadeUp 0.6s ease 0.3s both;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(77,184,255,0.1);
+      border-radius: 14px; padding: 14px; text-align: center;
+    }
+    .stat-icon { font-size: 24px; margin-bottom: 6px; }
+    .stat-value {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 20px; font-weight: 700; color: var(--foam);
+    }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .rewards-section { margin-bottom: 20px; animation: fadeUp 0.6s ease 0.4s both; }
+    .rewards-title {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .rewards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .reward-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 16px; text-align: center;
+      position: relative; overflow: hidden; transition: all 0.3s ease;
+    }
+    .reward-card.unlocked {
+      border-color: var(--gold);
+      background: rgba(245,200,66,0.08);
+      box-shadow: 0 0 20px rgba(245,200,66,0.2);
+    }
+    .reward-card.locked { opacity: 0.5; }
+    .reward-emoji { font-size: 36px; margin-bottom: 8px; display: block; }
+    .reward-name { font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; }
+    .reward-req { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .reward-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--gold); color: var(--ocean);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 20px;
+    }
+
+    .warning-card {
+      background: rgba(255,77,109,0.1);
+      border: 1px solid rgba(255,77,109,0.3);
+      border-radius: 14px; padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s ease 0.5s both;
+    }
+    .warning-card .icon { font-size: 24px; }
+    .warning-card p { font-size: 13px; color: #ff8fa3; line-height: 1.5; }
+
+    .loading {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh; gap: 16px;
+    }
+    .loading-ship { font-size: 48px; animation: shipBob 1.5s ease-in-out infinite; }
+    .loading p { color: var(--muted); font-size: 14px; }
+
+    .not-registered { text-align: center; padding: 40px 20px; }
+    .not-registered .big-icon { font-size: 64px; margin-bottom: 16px; }
+    .not-registered h2 {
+      font-family: 'Unbounded', sans-serif; font-size: 18px; margin-bottom: 8px;
+    }
+    .not-registered p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="waves">
+  <div class="wave wave1"></div>
+  <div class="wave wave2"></div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <h1>🚢 Kema O'yini</h1>
+    <p>Orollarni zabt eting, mukofot qozonib oling!</p>
+  </div>
+  <div id="app">
+    <div class="loading">
+      <div class="loading-ship">🚢</div>
+      <p>Yuklanmoqda...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  const API = "https://wep-app-production-46b5.up.railway.app";
+  const user = tg.initDataUnsafe?.user;
+
+  async function loadUser() {
+    if (!user) { showNotRegistered(); return; }
+    try {
+      await fetch(`${API}/user/register?telegram_id=${user.id}&name=${encodeURIComponent(user.first_name)}`, { method: 'POST' });
+      const res = await fetch(`${API}/user/${user.id}`);
+      const data = await res.json();
+      if (data.error) showNotRegistered();
+      else renderDashboard(data);
+    } catch(e) {
+      document.getElementById('app').innerHTML = `
+        <div class="not-registered">
+          <div class="big-icon">⚠️</div>
+          <h2>Xatolik</h2>
+          <p>Server bilan bog'lanib bo'lmadi.</p>
+        </div>`;
+    }
+  }
+
+  function renderDashboard(data) {
+    const island = data.current_island || 0;
+    const purchases = data.purchases || 0;
+    const status = data.status || 'active';
+    const name = data.name || user?.first_name || 'Foydalanuvchi';
+    const islandProgress = purchases % 200;
+    const progressPct = Math.min((islandProgress / 200) * 100, 100);
+    const shipLeft = Math.min(progressPct, 92);
+    const damas_unlocked = island >= 20;
+    const cobalt_unlocked = island >= 25;
+    const daysLeft = getDaysLeftInMonth();
+    const showWarning = islandProgress < 100 && daysLeft <= 7 && status === 'active';
+    const statusMap = {
+      active: { label: 'Faol', cls: 'status-active' },
+      sunk: { label: "Cho'kdi", cls: 'status-sunk' },
+      finished: { label: 'Yutdi!', cls: 'status-finished' },
+    };
+    const s = statusMap[status] || statusMap.active;
+
+    document.getElementById('app').innerHTML = `
+      <div class="user-card">
+        <div class="avatar">${name.charAt(0).toUpperCase()}</div>
+        <div class="user-info">
+          <h3>${name}</h3>
+          <p>Telegram foydalanuvchi</p>
+        </div>
+        <span class="status-badge ${s.cls}">${s.label}</span>
+      </div>
+
+      <div class="island-card">
+        <div class="island-header">
+          <h2>Joriy Orol</h2>
+          <span class="island-num">${island} / 25</span>
+        </div>
+        <div class="ship-journey">
+          <div class="journey-line"></div>
+          <div class="journey-progress" style="width:${shipLeft}%"></div>
+          <span class="island-start">🏝️</span>
+          <span class="ship-icon" style="left:calc(${shipLeft}% - 14px)">🚢</span>
+          <span class="island-end">🏝️</span>
+        </div>
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>Keyingi orolga</span>
+            <span>${islandProgress} / 200 dona</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${progressPct}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">💊</div>
+          <div class="stat-value">${purchases}</div>
+          <div class="stat-label">Jami dorilar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🗓️</div>
+          <div class="stat-value">${daysLeft}</div>
+          <div class="stat-label">Kun qoldi</div>
+        </div>
+      </div>
+
+      ${showWarning ? `
+      <div class="warning-card">
+        <span class="icon">⚠️</span>
+        <p>Oyning oxiriga ${daysLeft} kun qoldi! Kema cho'kmasligi uchun ${200 - islandProgress} dona dori kerak.</p>
+      </div>` : ''}
+
+      <div class="rewards-section">
+        <p class="rewards-title">Mukofotlar</p>
+        <div class="rewards-grid">
+          <div class="reward-card ${damas_unlocked ? 'unlocked' : 'locked'}">
+            ${damas_unlocked ? '<span class="reward-badge">✓</span>' : ''}
+            <span class="reward-emoji">🚗</span>
+            <div class="reward-name">Damas</div>
+            <div class="reward-req">20-orol · 4000 dona</div>
+          </div>
+          <div class="reward-card ${cobalt_unlocked ? 'unlocked' : 'locked'}">
+            ${cobalt_unlocked ? '<span class="reward-badge">✓</span>' : ''}
+            <span class="reward-emoji">🏆</span>
+            <div class="reward-name">Cobalt</div>
+            <div class="reward-req">25-orol · 5000 dona</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function showNotRegistered() {
+    document.getElementById('app').innerHTML = `
+      <div class="not-registered">
+        <div class="big-icon">⚓</div>
+        <h2>Xush kelibsiz!</h2>
+        <p>Siz hali ro'yxatdan o'tmagansiz. Admin sizni qo'shishi kerak.</p>
+      </div>`;
+  }
+
+  function getDaysLeftInMonth() {
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return lastDay.getDate() - now.getDate();
+  }
+
+  loadUser();
+</script>
+</body>
+</html>
