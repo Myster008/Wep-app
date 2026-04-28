@@ -59,7 +59,7 @@ def add_purchase(telegram_id: int, amount: int, db: Session = Depends(get_db)):
 # Admin — barcha foydalanuvchilar
 @app.get("/admin/users")
 def get_all_users(secret: str, db: Session = Depends(get_db)):
-    if secret != "ADMIN_SECRET_KEY":
+    if secret != "admintest":
         return {"error": "Ruxsat yo'q"}
     users = db.query(User).all()
     return users
