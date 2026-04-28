@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from database import get_db, engine
 from models import Base, User, Purchase
@@ -7,6 +8,14 @@ from datetime import datetime
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# CORS qo'shish
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/user/{telegram_id}")
 def get_user(telegram_id: int, db: Session = Depends(get_db)):
