@@ -27,9 +27,4 @@ class Reward(Base):
     reward_type = Column(String)  # Damas, Cobalt
     date = Column(DateTime, default=func.now())
 
-class Reward(Base):
-    __tablename__ = "rewards"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer)
-    reward_type = Column(String)
-    date = Column(DateTime, default=func.now())
+
