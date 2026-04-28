@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: sans-serif;
+      background: var(--tg-theme-bg-color, #fff);
+      color: var(--tg-theme-text-color, #000);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 16px; }
+
+    .score {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+    .score-item { text-align: center; }
+    .score-label { font-size: 12px; opacity: 0.6; }
+    .score-val { font-size: 24px; font-weight: bold; }
+    .score-val.x { color: #534AB7; }
+    .score-val.o { color: #0F6E56; }
+
+    .status {
+      font-size: 16px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 90px);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      width: 90px;
+      height: 90px;
+      background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+      border: none;
+      border-radius: 12px;
+      font-size: 36px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .cell:active { transform: scale(0.95); }
+    .cell.x { color: #534AB7; }
+    .cell.o { color: #0F6E56; }
+    .cell.win { background: #B5D4F4; }
+
+    button.restart {
+      padding: 12px 32px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: none;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+      cursor: pointer;
+    }
+    button.restart:active { opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+  <h1>Tic-Tac-Toe</h1>
+
+  <div class="score">
+    <div class="score-item">
+      <div class="score-label">X (1-o'yinchi)</div>
+      <div class="score-val x" id="sx">0</div>
+    </div>
+    <div class="score-item">
+      <div class="score-label">Durang</div>
+      <div class="score-val" id="sd">0</div>
+    </div>
+    <div class="score-item">
+      <div class="score-label">O (2-o'yinchi)</div>
+      <div class="score-val o" id="so">0</div>
+    </div>
+  </div>
+
+  <div class="status" id="status">X ning navbati</div>
+  <div class="board" id="board"></div>
+  <button class="restart" onclick="init()">Qayta boshlash</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let board, current, over, scores = {X:0, O:0, D:0};
+
+    function init() {
+      board = Array(9).fill(null);
+      current = 'X';
+      over = false;
+      render();
+      document.getElementById('status').textContent = "X ning navbati";
+    }
+
+    function render() {
+      const el = document.getElementById('board');
+      el.innerHTML = '';
+      board.forEach((v, i) => {
+        const c = document.createElement('div');
+        c.className = 'cell' + (v ? ' ' + v.toLowerCase() : '');
+        c.textContent = v || '';
+        c.onclick = () => move(i);
+        el.appendChild(c);
+      });
+    }
+
+    function move(i) {
+      if (over || board[i]) return;
+      board[i] = current;
+      const w = checkWin();
+      render();
+      if (w) {
+        w.forEach(idx => document.querySelectorAll('.cell')[idx].classList.add('win'));
+        document.getElementById('status').textContent = current + " yutdi! 🎉";
+        scores[current]++;
+        over = true;
+      } else if (board.every(Boolean)) {
+        document.getElementById('status').textContent = "Durang! 🤝";
+        scores.D++;
+        over = true;
+      } else {
+        current = current === 'X' ? 'O' : 'X';
+        document.getElementById('status').textContent = current + " ning navbati";
+      }
+      document.getElementById('sx').textContent = scores.X;
+      document.getElementById('so').textContent = scores.O;
+      document.getElementById('sd').textContent = scores.D;
+    }
+
+    function checkWin() {
+      for (const [a,b,c] of wins)
+        if (board[a] && board[a]===board[b] && board[b]===board[c]) return [a,b,c];
+      return null;
+    }
+
+    init();
+  </script>
+</body>
+</html>
